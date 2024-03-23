@@ -1,0 +1,254 @@
+%{
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+void yyerror(char *); 
+extern FILE *yyin;								
+extern FILE *yyout;		
+extern int line_num;
+extern int yylex();
+extern int yyval;
+extern char* yytext;
+extern char* ActiveCheck;
+extern int yyparse();
+void CategoryRule(int a);
+void yyerror(char *s);
+void idRULE(int a);
+void GameIDRule(int g);
+void Act(char *d);
+void JsonItemsNum(int number);
+void ListRule(int list);
+void ListCountRule(int count);
+int idnum;
+int category;	
+int jsonitems=0;	
+int countlist=0;
+int listnum;				
+%}
+
+
+%union
+{
+    char *t_str;
+    int t_int;
+    float t_float;
+}
+
+
+
+
+
+
+%token plus
+%token minus
+%token start
+%token next
+%token stop
+%token StartBracers
+%token StopBracers
+%token StartBrackets
+%token StopBrackets
+%token BOOLEAN
+%token<t_str> STRING
+%token<t_int> INT
+%token<t_float> FLOAT
+%token gameID
+%token drawID
+%token DrawTime
+%token Status
+%token DrawBreak
+%token VisualDraw
+%token PricePoints
+%token WinningNumbers
+%token PrizeCategories
+%token WagerStatistics
+%token List
+%token Bonus
+%token ID
+%token Divident
+%token Winners
+%token Distributed
+%token Jackpot
+%token Fixed
+%token CategoryType
+%token GameType
+%token MinimumDistributed
+%token Last
+%token Columns
+%token Wager
+%token AddOn
+%token Amount
+%token Content
+%token TotalPages
+%token TotalElements
+%token NumberOfElements
+%token Sort
+%token Direction
+%token Property
+%token IgnoreCase
+%token NullHandling
+%token Descending
+%token Ascending
+%token First 
+%token Size 
+%token Number
+
+%%
+jsonFile:   StartBrackets ChooseR StopBrackets; 
+                                            
+ChooseR: LastAndActiveR| ContentetcR ;
+
+ContentetcR: Content start ContentArrayR next TotalPages start INT next TotalElements start INT next
+             Last start BOOLEAN next NumberOfElements start INT next Sort start SortArrayR next 
+             First start BOOLEAN next Size start INT next Number start INT 
+
+ContentArrayR: StartBracers LastR ContentArrayR
+                            |next LastR ContentArrayR
+                            |StopBracers;
+
+                        
+LastAndActiveR:   Last start LastR next STRING start ActiveR ;
+
+SortArrayR: StartBracers SortR SortArrayR
+                         |next SortR SortArrayR
+                         |StopBracers;        
+
+SortR: StartBrackets Direction start STRING next Property start STRING next IgnoreCase
+       start BOOLEAN next NullHandling start STRING next Descending start BOOLEAN
+       next Ascending start BOOLEAN StopBrackets;
+       
+
+LastR:        StartBrackets gameID start INT{$<t_int>$=$<t_int>4;idnum=yyval.t_int;GameIDRule(idnum);} next drawID start INT next DrawTime start INT next 
+              Status start STRING next DrawBreak start INT next VisualDraw start INT
+              next PricePoints start PPR next WinningNumbers start WNR next
+              PrizeCategories start JSONARRAYR {JsonItemsNum(jsonitems);jsonitems=0;} next WagerStatistics start WSR StopBrackets ;
+       
+
+ActiveR: StartBrackets gameID start INT{$<t_int>$=$<t_int>4;idnum=yyval.t_int;GameIDRule(idnum);} next drawID start INT next DrawTime start INT next 
+         Status start STRING next DrawBreak start INT next VisualDraw start INT
+         next PricePoints start PPR next PrizeCategories start JSONARRAYR {JsonItemsNum(jsonitems);jsonitems=0;} next 
+         WagerStatistics start WSR StopBrackets;
+         
+PPR:    StartBrackets Amount start FLOAT StopBrackets;
+     
+WNR:   StartBrackets List start ListR{ListCountRule(countlist);countlist=0;} next Bonus start bonusR StopBrackets; 
+
+ListR:  StartBracers INT{$<t_int>$=$2;listnum=yyval.t_int;ListRule(listnum);countlist++;} ListR
+              | next INT{$<t_int>$=$2;listnum=yyval.t_int;ListRule(listnum);countlist++;} ListR
+              | StopBracers;
+
+bonusR: StartBracers INT StopBracers;
+
+        
+WSR:    StartBrackets Columns start INT next Wager start INT next AddOn start JARRAYR
+        StopBrackets
+         ;
+         
+JARRAYR: StartBracers TYPER JARRAYR
+                      |next TYPER JARRAYR
+                      |StopBracers;
+
+
+TYPER: INT|FLOAT|STRING| ;
+
+JSONARRAYR:  StartBracers JSONITEMR{jsonitems++;} JSONARRAYR
+                              |next JSONITEMR{jsonitems++;} JSONARRAYR
+                              |StopBracers;
+                              
+                              
+JSONITEMR:   StartBrackets ID start INT {$<t_int>$=$4;idnum=yylval.t_int;} next Divident start FLOAT
+             next Winners start INT next Distributed start FLOAT next Jackpot start FLOAT next Fixed start FLOAT next CategoryType start        
+             INT {$<t_int>$=$29;category=yylval.t_int; CategoryRule(category);} next GameType start STRING 
+             MinimumDisR;
+             
+MinimumDisR:   next MinimumDistributed {idRULE(idnum);} start FLOAT StopBrackets
+               |  StopBrackets
+               ;       
+             
+%%
+
+void ListCountRule(int count)
+{
+if(count!=5)
+{
+printf("\nList needs exactly 5 intigers! \n");
+exit(EXIT_FAILURE);
+}
+}
+
+void ListRule(int list)
+{
+if(list<1 || list>45)
+{
+printf("\nYou need integers between 1 and 45 in this section! \n");
+exit(EXIT_FAILURE);
+}
+}
+
+void JsonItemsNum(int number)
+{
+ if(number!=8)
+{
+printf("\nYou need exactly 8 json items! \n");
+exit(EXIT_FAILURE);
+}
+}
+
+void GameIDRule(int g)
+{
+//printf("(%d)",g);
+if((g==1100) || (g==1110) || (g==2100) || (g==2101) || (g==5103) || (g==5104) || (g==5106) ) ;
+else
+{
+printf("\nWrong GameID: %d \n",g);
+exit(EXIT_FAILURE);
+}
+}
+
+void CategoryRule(int a)
+ {
+ if(a>1 || a<0) 
+ {
+ printf("\nWrong Category Type\n");
+ exit(EXIT_FAILURE);}
+ }
+
+
+
+void idRULE(int a)
+{
+if(a>8 || a<1) 
+{
+   printf("\nWrong id number \n");
+   exit(EXIT_FAILURE);
+   }
+
+else if (a!=1) {
+
+  printf("\nID is not 1\n");
+  exit(EXIT_FAILURE);
+
+
+}		
+}
+
+
+void yyerror(char *s) 
+{
+    fprintf(stderr, " line %d: %s\n", line_num, s);
+    
+    }
+    
+    
+    
+    
+    int main (int argc, char **argv) 
+    {
+        
+	FILE *jfile = fopen(argv[1], "r");
+	yyin = jfile;
+	yyparse();
+	return 0;
+	}
+	

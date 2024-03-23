@@ -1,0 +1,93 @@
+%{
+#include "y.tab.h"  
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int line_num=1;
+int idnum;
+%}
+
+
+
+%option noyywrap
+
+
+integer         [0-9]+
+float          {integer}\.{integer}
+boolean        ("true"|"false")
+string          \"[^"]*\" 
+cstring	{string}.{string}
+ws 	        [ \t\n\r]
+idnum          [1-8]
+category       [0-1]
+
+
+%%
+"+"  {printf("%s", yytext);return plus;}
+"-"  {printf("%s", yytext);return minus;}
+":"  {printf("%s", yytext);return start;}
+","  {printf("%s", yytext);return next;}
+"."  {printf("%s", yytext);return stop;}
+"["  {printf("%s", yytext);return StartBracers;}
+"]"  {printf("%s", yytext);return StopBracers;}
+"{"  {printf("%s", yytext);return StartBrackets;}
+"}"  {printf("%s", yytext);return StopBrackets;}
+\n	  {++line_num;} 
+{ws}	  {;}
+{boolean}  {printf("%s", yytext);return BOOLEAN;}
+{float}   {printf("%s", yytext); yylval.t_float = atof(yytext); return FLOAT;}
+{integer}	 {printf("%s", yytext); yylval.t_int = atoi(yytext); return INT;} 
+\"last\" {printf("%s", yytext);return Last; }
+
+\"gameId\"  {printf("%s", yytext);return gameID; }
+\"drawId\"  {printf("%s", yytext);return drawID;}
+\"drawTime\"  {printf("%s", yytext);return DrawTime;}
+\"status\"  {printf("%s", yytext);return Status;}
+\"drawBreak\"  {printf("%s", yytext);return DrawBreak;}
+\"visualDraw\"  {printf("%s", yytext);return VisualDraw;}
+\"pricePoints\"  {printf("%s", yytext);return PricePoints;}
+\"winningNumbers\"  {printf("%s", yytext);return WinningNumbers;}
+\"prizeCategories\"  {printf("%s", yytext);return PrizeCategories;}
+\"wagerStatistics\"  {printf("%s", yytext);return WagerStatistics;}
+\"list\"  {printf("%s", yytext);return List;}
+\"bonus\"  {printf("%s", yytext);return Bonus;}
+\"id\"  {printf("%s", yytext);return ID;}
+\"divident\" {printf("%s", yytext);return Divident;}
+\"winners\"  {printf("%s", yytext);return Winners;}
+\"distributed\"  {printf("%s", yytext);return Distributed;}
+\"jackpot\"  {printf("%s", yytext);return Jackpot;}
+\"fixed\"  {printf("%s", yytext);return Fixed;}
+\"categoryType\"  {printf("%s", yytext);return CategoryType;}
+\"gameType\"  {printf("%s\n", yytext);return GameType;}
+\"minimumDistributed\"  {printf("%s", yytext);return MinimumDistributed;}
+\"amount\" {printf("%s", yytext);return Amount;}
+\"columns\" {printf("%s", yytext);return Columns; }
+\"wagers\" {printf("%s", yytext);return Wager; }
+\"addOn\" {printf("%s", yytext);return AddOn; }
+\"content\" {printf("%s", yytext);return Content;}
+\"totalPages\" {printf("%s",yytext);return TotalPages;}
+\"totalElements\" {printf("%s",yytext);return TotalElements;}
+\"numberOfElements\" {printf("%s",yytext);return NumberOfElements;}
+\"sort\" {printf("%s",yytext);return Sort;}
+\"direction\" {printf("%s",yytext);return Direction;}
+\"property\" {printf("%s",yytext);return Property;}
+\"ignoreCase\" {printf("%s",yytext);return IgnoreCase;}
+\"nullHandling\" {printf("%s",yytext);return NullHandling;}
+\"descending\" {printf("%s",yytext);return Descending;}
+\"ascending\" {printf("%s",yytext);return Ascending;}
+\"first\" {printf("%s",yytext);return First;}
+\"size\" {printf("%s",yytext);return Size;}
+\"number\" {printf("%s",yytext);return Number;}
+{string} {printf("%s", yytext); yylval.t_str = strdup(yytext); return STRING; }
+ 
+
+
+
+
+
+
+
+
+
+
+%%
